@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delhi Metro Navi - DMRC Travel Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #f5f5f5;
+            --yellow-line: #FECD08;
+            --red-line: #E61E24;
+            --blue-line: #005BA3;
+            --green-line: #009B48;
+            --violet-line: #6D2077;
+            --pink-line: #EC76B4;
+            --magenta-line: #93278F;
+            --grey-line: #6D6E71;
+            --orange-line: #F26C2B;
+            --white: #ffffff;
+            --dark: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--secondary);
+            color: var(--dark);
+            transition: all 0.3s ease;
+            padding-bottom: 80px;
+        }
+
+        .app-container {
+            max-width: 100%;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+        }
+
+        .language-toggle {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .language-toggle i {
+            margin-right: 5px;
+        }
+
+        .main-view {
+            padding: 20px;
+        }
+
+        .route-planner {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .station-selector {
+            position: relative;
+        }
+
+        .station-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .station-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .swap-button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .swap-button:hover {
+            transform: rotate(180deg);
+        }
+
+        .action-button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .action-button:hover {
+            background-color: #003d82;
+        }
+
+        .action-button.secondary {
+            background-color: var(--yellow-line);
+            color: var(--dark);
+        }
+
+        .action-button.secondary:hover {
+            background-color: #e0bb00;
+        }
+
+        .route-result {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .route-summary {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .route-info {
+            flex: 1;
+        }
+
+        .route-info-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        .route-info-value {
+            font-size: 18px;
+        }
+
+        .route-steps {
+            margin-top: 20px;
+        }
+
+        .route-step {
+            display: flex;
+            margin-bottom: 20px;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .step-icon {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .step-details {
+            flex: 1;
+        }
+
+        .step-station {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .metro-lines-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .metro-lines-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .metro-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .metro-line-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .metro-line-name {
+            font-weight: bold;
+        }
+
+        .metro-line-stations {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .recommendations {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommendations-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .places-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .place-card {
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .place-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .place-image {
+            width: 100%;
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .place-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            padding: 10px;
+            color: white;
+        }
+
+        .place-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .place-distance {
+            font-size: 12px;
+        }
+
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            text-decoration: none;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+        }
+
+        .tab-button i {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .voice-input-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .station-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .nearest-station {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: rgba(0, 86, 179, 0.1);
+            border-radius: 8px;
+        }
+
+        .nearest-station i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .yellow-line { background-color: var(--yellow-line); }
+        .red-line { background-color: var(--red-line); }
+        .blue-line { background-color: var(--blue-line); }
+        .green-line { background-color: var(--green-line); }
+        .violet-line { background-color: var(--violet-line); }
+        .pink-line { background-color: var(--pink-line); }
+        .magenta-line { background-color: var(--magenta-line); }
+        .grey-line { background-color: var(--grey-line); }
+        .orange-line { background-color: var(--orange-line); }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .route-summary {
+                flex-direction: column;
+            }
+            
+            .route-info {
+                margin-bottom: 10px;
+            }
+            
+            .places-container {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+
+        /* Animation for route display */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .route-result {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Modal for place details */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .place-detail-image {
+            width: 100%;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .place-detail-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .place-detail-description {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .place-detail-metro {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .place-detail-metro i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Offline indicator */
+        .offline-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="offline-indicator">
+            <i class="fas fa-wifi"></i> Offline Mode
+        </div>
+
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-subway"></i>
+                    <span id="app-title">Delhi Metro Navi</span>
+                </div>
+                <button class="language-toggle" id="toggle-language">
+                    <i class="fas fa-language"></i>
+                    <span id="language-text">हिंदी</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-view">
+            <section class="route-planner" id="route-planner">
+                <h2 id="plan-journey">Plan Your Journey</h2>
+                <div class="nearest-station" id="nearest-station-container" style="display: none;">
+                    <i class="fas fa-location-arrow"></i>
+                    <span id="nearest-station-text">Nearest station: Rajiv Chowk</span>
+                </div>
+                <div class="input-group">
+                    <label id="from-label">From Station</label>
+                    <div class="station-selector">
+                        <input type="text" class="station-input" id="from-station" placeholder="Enter starting station">
+                        <button class="voice-input-button" id="mic-from">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <div class="station-suggestions" id="from-suggestions"></div>
+                    </div>
+                </div>
+                <button class="swap-button" id="swap-stations">
+                    <i class="fas fa-exchange-alt"></i>
+                </button>
+                <div class="input-group">
+                    <label id="to-label">To Station</label>
+                    <div class="station-selector">
+                        <input type="text" class="station-input" id="to-station" placeholder="Enter destination station">
+                        <button class="voice-input-button" id="mic-to">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <div class="station-suggestions" id="to-suggestions"></div>
+                    </div>
+                </div>
+                <button class="action-button" id="find-route">
+                    <span id="find-route-text">Find Route</span>
+                </button>
+                <button class="action-button secondary" id="use-location">
+                    <i class="fas fa-location-arrow"></i>
+                    <span id="use-location-text">Use My Location</span>
+                </button>
+            </section>
+
+            <section class="route-result" id="route-result">
+                <div class="route-summary">
+                    <div class="route-info">
+                        <div class="route-info-title" id="travel-time-title">Travel Time</div>
+                        <div class="route-info-value" id="travel-time">25 minutes</div>
+                    </div>
+                    <div class="route-info">
+                        <div class="route-info-title" id="total-cost-title">Total Cost</div>
+                        <div class="route-info-value" id="total-cost">₹30</div>
+                    </div>
+                    <div class="route-info">
+                        <div class="route-info-title" id="changes-title">Changes</div>
+                        <div class="route-info-value" id="changes">1</div>
+                    </div>
+                </div>
+                <div class="route-steps" id="route-steps">
+                    <!-- Route steps will be generated here -->
+                </div>
+            </section>
+
+            <section class="metro-lines-container" id="metro-lines">
+                <h2 class="metro-lines-title" id="metro-lines-title">Delhi Metro Lines</h2>
+                <div class="metro-line">
+                    <div class="metro-line-color yellow-line">
+                        <i class="fas fa-train"></i>
+                    </div>
+                    <div>
+                        <div class="metro-line-name" id="yellow-line-name">Yellow Line</div>
+                        <div class="metro-line-stations" id="yellow-line-stations">Samaypur Badli to HUDA City Centre</div>
+                    </div>
+                </div>
+                <div class="metro-line">
+                    <div class="metro-line-color red-line">
+                        <i class="fas fa-train"></i>
+                    </div>
+                    <div>
+                        <div class="metro-line-name" id="red-line-name">Red Line</div>
+                        <div class="metro-line-stations" id="red-line-stations">Rithala to Shaheed Sthal</div>
+                    </div>
+                </div>
+                <div class="metro-line">
+                    <div class="metro-line-color blue-line">
+                        <i class="fas fa-train"></i>
+                    </div>
+                    <div>
+                        <div class="metro-line-name" id="blue-line-name">Blue Line</div>
+                        <div class="metro-line-stations" id="blue-line-stations">Dwarka Sector 21 to Noida Electronic City/Vaishali</div>
+                    </div>
+                </div>
+                <div class="metro-line">
+                    <div class="metro-line-color green-line">
+                        <i class="fas fa-train"></i>
+                    </div>
+                    <div>
+                        <div class="metro-line-name" id="green-line-name">Green Line</div>
+                        <div class="metro-line-stations" id="green-line-stations">Inderlok to Brigadier Hoshiar Singh</div>
+                    </div>
+                </div>
+                <div class="metro-line">
+                    <div class="metro-line-color violet-line">
+                        <i class="fas fa-train"></i>
+                    </div>
+                    <div>
+                        <div class="metro-line-name" id="violet-line-name">Violet Line</div>
+                        <div class="metro-line-stations" id="violet-line-stations">Kashmere Gate to Raja Nahar Singh</div>
+                    </div>
+                </div>
+                <div class="metro-line">
+                    <div class="metro-line-color magenta-line">
+                        <i class="fas fa-train"></i>
+                    </div>
+                    <div>
+                        <div class="metro-line-name" id="magenta-line-name">Magenta Line</div>
+                        <div class="metro-line-stations" id="magenta-line-stations">Janakpuri West to Botanical Garden</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="recommendations" id="recommendations">
+                <h2 class="recommendations-title" id="recommendations-title">Nearby Famous Places</h2>
+                <div class="places-container" id="places-container">
+                    <!-- Place cards will be generated here -->
+                </div>
+            </section>
+        </div>
+
+        <div class="tab-bar">
+            <a class="tab-button active" id="tab-home">
+                <i class="fas fa-home"></i>
+                <span id="tab-home-text">Home</span>
+            </a>
+            <a class="tab-button" id="tab-lines">
+                <i class="fas fa-train"></i>
+                <span id="tab-lines-text">Lines</span>
+            </a>
+            <a class="tab-button" id="tab-places">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="tab-places-text">Places</span>
+            </a>
+            <a class="tab-button" id="tab-settings">
+                <i class="fas fa-cog"></i>
+                <span id="tab-settings-text">Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="modal-overlay" id="place-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-modal">&times;</span>
+            <div class="place-detail-image" id="place-detail-image"></div>
+            <h2 class="place-detail-name" id="place-detail-name">India Gate</h2>
+            <p class="place-detail-description" id="place-detail-description">The India Gate is a war memorial located astride the Rajpath in New Delhi, dedicated to 70,000 soldiers of the British Indian Army who died between 1914 and 1921 in the First World War.</p>
+            <div class="place-detail-metro">
+                <i class="fas fa-subway"></i>
+                <span id="place-metro-station">Nearest Metro: Central Secretariat (Yellow Line)</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample station data for all Delhi Metro lines
+        const metroStations = {
+            yellowLine: ["Samaypur Badli", "Rohini Sector 18, 19", "Haiderpur Badli Mor", "Jahangirpuri", "Adarsh Nagar", "Azadpur", "Model Town", "GTB Nagar", "Vishwavidyalaya", "Vidhan Sabha", "Civil Lines", "Kashmere Gate", "Chandni Chowk", "Chawri Bazar", "New Delhi", "Rajiv Chowk", "Patel Chowk", "Central Secretariat", "Udyog Bhawan", "Lok Kalyan Marg", "Jor Bagh", "INA", "AIIMS", "Green Park", "Hauz Khas", "Malviya Nagar", "Saket", "Qutub Minar", "Chhatarpur", "Sultanpur", "Ghitorni", "Arjan Garh", "Guru Dronacharya", "Sikandarpur", "MG Road", "IFFCO Chowk", "HUDA City Centre"],
+            redLine: ["Shaheed Sthal", "Hindon River", "Arthala", "Mohan Nagar", "Shyam Park", "Major Mohit Sharma", "Raj Bagh", "Shaheed Nagar", "Dilshad Garden", "Jhilmil", "Mansarovar Park", "Shahdara", "Welcome", "Seelampur", "Shastri Park", "Kashmere Gate", "Tis Hazari", "Pul Bangash", "Pratap Nagar", "Shastri Nagar", "Inderlok", "Kanhaiya Nagar", "Keshav Puram", "Netaji Subhash Place", "Kohat Enclave", "Pitam Pura", "Rohini East", "Rohini West", "Rithala"],
+            blueLine: ["Dwarka Sector 21", "Dwarka Sector 8", "Dwarka Sector 9", "Dwarka Sector 10", "Dwarka Sector 11", "Dwarka Sector 12", "Dwarka Sector 13", "Dwarka Sector 14", "Dwarka Mor", "Nawada", "Uttam Nagar West", "Uttam Nagar East", "Janakpuri West", "Janakpuri East", "Tilak Nagar", "Subhash Nagar", "Tagore Garden", "Rajouri Garden", "Ramesh Nagar", "Moti Nagar", "Kirti Nagar", "Shadipur", "Patel Nagar", "Rajendra Place", "Karol Bagh", "Rajiv Chowk", "Barakhamba Road", "Mandi House", "Pragati Maidan", "Indraprastha", "Yamuna Bank", "Akshardham", "Mayur Vihar Phase-1", "Mayur Vihar Extension", "New Ashok Nagar", "Noida Sector 15", "Noida Sector 16", "Noida Sector 18", "Botanical Garden", "Golf Course", "Noida City Centre", "Noida Sector 34", "Noida Sector 52", "Noida Sector 61", "Noida Sector 59", "Noida Sector 62", "Noida Electronic City"],
+            greenLine: ["Madipur", "Shivaji Park", "Punjabi Bagh East", "ESI Hospital", "Rajouri Garden", "Maya Puri", "Naraina Vihar", "Delhi Cantonment", "Dhaula Kuan", "Qutub Minar", "Chhatarpur", "Sultanpur", "Ghitorni", "Arjan Garh", "Guru Dronacharya", "Sikandarpur", "MG Road", "IFFCO Chowk", "HUDA City Centre"],
+            violetLine: ["Kashmere Gate", "Lal Quila", "Jama Masjid", "Delhi Gate", "ITO", "Mandi House", "Janpath", "Central Secretariat", "Khan Market", "JLN Stadium", "Jangpura", "Lajpat Nagar", "Moolchand", "Kailash Colony", "Nehru Place", "Kalkaji Mandir", "Govindpuri", "Harkesh Nagar", "Jasola Apollo", "Sarita Vihar", "Mohan Estate", "Tughlakabad", "Badarpur", "Sarai", "NHPC Chowk", "Mewala Maharajpur", "Sector 28", "Badkal Mor", "Old Faridabad", "Neelam Chowk Ajronda", "Bata Chowk", "Escorts Mujesar", "Sant Surdas - Sihi", "Raja Nahar Singh"],
+            magentaLine: ["Janakpuri West", "Dabri Mor", "Dashrath Puri", "Palam", "Sadar Bazaar Cantonment", "Terminal 1-IGI Airport", "Shankar Vihar", "Vasant Vihar", "Munirka", "RK Puram", "IIT Delhi", "Hauz Khas", "Panchsheel Park", "Chirag Delhi", "Greater Kailash", "Nehru Enclave", "Kalkaji Mandir", "Okhla NSIC", "Sukdev Vihar", "Jamia Milia Islamia", "Okhla Vihar", "Jasola Vihar Shaheen Bagh", "Kalindi Kunj", "Okhla Bird Sanctuary", "Botanical Garden"],
+            pinkLine: ["Majlis Park", "Azadpur", "Shalimar Bagh", "Netaji Subhash Place", "Shakurpur", "Punjabi Bagh West", "ESI Hospital", "Rajouri Garden", "Maya Puri", "Naraina Vihar", "Delhi Cantonment", "Dhaula Kuan", "Durgabai Deshmukh South Campus", "Sir Vishweshwaraiah Moti Bagh", "Bhikaji Cama Place", "Sarojini Nagar", "INA", "South Extension", "Lajpat Nagar", "Vinobapuri", "Ashram", "Sarai Kale Khan - Nizamuddin", "Mayur Vihar Phase-I", "Mayur Vihar Pocket I", "Trilokpuri Sanjay Lake", "Vinod Nagar East", "Vinod Nagar West", "IP Extension", "Anand Vihar", "Karkarduma", "Karkarduma Court", "Krishna Nagar", "East Azad Nagar", "Welcome"],
+            greyLine: ["Dwarka", "Nangli", "Najafgarh", "Dhansa Bus Stand"],
+            orangeLine: ["New Delhi", "Shivaji Stadium", "Dhaula Kuan", "Delhi Aerocity", "IGI Airport", "Dwarka Sector 21"]
+        };
+
+        // Famous places in Delhi with metro station information
+        const famousPlaces = [
+            {
+                id: 1,
+                name: "India Gate",
+                nameHindi: "इंडिया गेट",
+                description: "The India Gate is a war memorial located astride the Rajpath in New Delhi, dedicated to 70,000 soldiers of the British Indian Army who died between 1914 and 1921 in the First World War.",
+                descriptionHindi: "इंडिया गेट नई दिल्ली में राजपथ के पास स्थित एक युद्ध स्मारक है, जो 1914 और 1921 के बीच प्रथम विश्व युद्ध में मारे गए ब्रिटिश भारतीय सेना के 70,000 सैनिकों को समर्पित है।",
+                metroStation: "Central Secretariat",
+                metroLine: "Yellow Line",
+                distance: "0.5 km",
+                imageAlt: "Majestic India Gate war memorial at sunset with fountains in foreground and illuminated archway"
+            },
+            {
+                id: 2,
+                name: "Qutub Minar",
+                nameHindi: "कुतुब मीनार",
+                description: "The Qutub Minar is a minaret that forms part of the Qutb complex, a UNESCO World Heritage Site in the Mehrauli area of Delhi.",
+                descriptionHindi: "कुतुब मीनार एक मीनार है जो कुतब परिसर का हिस्सा है, जो दिल्ली के महरौली क्षेत्र में यूनेस्को की विश्व धरोहर स्थल है।",
+                metroStation: "Qutub Minar",
+                metroLine: "Yellow Line",
+                distance: "0.2 km",
+                imageAlt: "Ancient Qutub Minar tower with intricate carvings against blue sky, surrounded by historic ruins"
+            },
+            {
+                id: 3,
+                name: "Red Fort",
+                nameHindi: "लाल किला",
+                description: "The Red Fort is a historic fort in the city of Delhi that served as the main residence of the Mughal Emperors.",
+                descriptionHindi: "लाल किला दिल्ली शहर में एक ऐतिहासिक किला है जो मुगल सम्राटों का मुख्य निवास था।",
+                metroStation: "Chandni Chowk",
+                metroLine: "Yellow Line",
+                distance: "0.8 km",
+                imageAlt: "Majestic Red Fort sandstone walls with Indian flag flying, Mughal architecture details"
+            },
+            {
+                id: 4,
+                name: "Lotus Temple",
+                nameHindi: "कमल मंदिर",
+                description: "The Lotus Temple is a Bahá'í House of Worship notable for its flowerlike shape, located in Delhi.",
+                descriptionHindi: "कमल मंदिर एक बहाई उपासना गृह है जो अपने फूल जैसी आकृति के लिए प्रसिद्ध है, जो दिल्ली में स्थित है।",
+                metroStation: "Kalkaji Mandir",
+                metroLine: "Magenta Line",
+                distance: "1.2 km",
+                imageAlt: "White marble Lotus Temple with nine petals surrounded by lush green gardens and pools"
+            },
+            {
+                id: 5,
+                name: "Akshardham Temple",
+                nameHindi: "अक्षरधाम मंदिर",
+                description: "Swaminarayan Akshardham is a Hindu temple and spiritual-cultural campus in Delhi showcasing traditional Hindu and Indian culture.",
+                descriptionHindi: "स्वामिनारायण अक्षरधाम एक हिंदू मंदिर और आध्यात्मिक-सांस्कृतिक परिसर है जो पारंपरिक हिंदू और भारतीय संस्कृति को प्रदर्शित करता है।",
+                metroStation: "Akshardham",
+                metroLine: "Blue Line",
+                distance: "0.3 km",
+                imageAlt: "Ornate white marble Akshardham temple complex with domes and carved pillars reflecting in water"
+            },
+            {
+                id: 6,
+                name: "Humayun's Tomb",
+                nameHindi: "हुमायूँ का मकबरा",
+                description: "Humayun's Tomb is the tomb of the Mughal Emperor Humayun in Delhi, commissioned by his wife and considered a precursor to the Taj Mahal.",
+                descriptionHindi: "हुमायूँ का मकबरा दिल्ली में मुगल सम्राट हुमायूँ का मकबरा है, जिसे उनकी पत्नी ने निर्मित करवाया था और इसे ताजमहल का पूर्ववर्ती माना जाता है।",
+                metroStation: "JLN Stadium",
+                metroLine: "Violet Line",
+                distance: "1.5 km",
+                imageAlt: "Magnificent Humayun's Tomb with Persian-style gardens and red sandstone architecture"
+            },
+            {
+                id: 7,
+                name: "Jama Masjid",
+                nameHindi: "जामा मस्जिद",
+                description: "The Masjid-i Jahān-Numā, commonly known as the Jama Masjid of Delhi, is one of the largest mosques in India.",
+                descriptionHindi: "मस्जिद-ए-जहाँ-नुमा, जिसे आमतौर पर दिल्ली की जामा मस्जिद के नाम से जाना जाता है, भारत की सबसे बड़ी मस्जिदों में से एक है।",
+                metroStation: "Jama Masjid",
+                metroLine: "Violet Line",
+                distance: "0.1 km",
+                imageAlt: "Grand Jama Masjid facade with three domes and minarets, courtyard filled with people"
+            },
+            {
+                id: 8,
+                name: "National Museum",
+                nameHindi: "राष्ट्रीय संग्रहालय",
+                description: "The National Museum in New Delhi is one of the largest museums in India which holds variety of articles ranging from pre-historic era to modern works of art.",
+                descriptionHindi: "नई दिल्ली में राष्ट्रीय संग्रहालय भारत के सबसे बड़े संग्रहालयों में से एक है जिसमें प्रागैतिहासिक युग से लेकर आधुनिक कला कृतियों तक विभिन्न वस्तुएं संग्रहीत हैं।",
+                metroStation: "Central Secretariat",
+                metroLine: "Yellow Line",
+                distance: "0.7 km",
+                imageAlt: "National Museum building facade with entrance stairs and visitors, cultural artifacts visible inside"
+            }
+        ];
+
+        // Current language (false for English, true for Hindi)
+        let currentLanguage = false;
+        
+        // DOM elements
+        const toggleLanguageBtn = document.getElementById('toggle-language');
+        const languageText = document.getElementById('language-text');
+        const appTitle = document.getElementById('app-title');
+        const fromInput = document.getElementById('from-station');
+        const toInput = document.getElementById('to-station');
+        const fromSuggestions = document.getElementById('from-suggestions');
+        const toSuggestions = document.getElementById('to-suggestions');
+        const findRouteBtn = document.getElementById('find-route');
+        const routeResult = document.getElementById('route-result');
+        const routeSteps = document.getElementById('route-steps');
+        const travelTime = document.getElementById('travel-time');
+        const totalCost = document.getElementById('total-cost');
+        const changes = document.getElementById('changes');
+        const nearestStationContainer = document.getElementById('nearest-station-container');
+        const nearestStationText = document.getElementById('nearest-station-text');
+        const useLocationBtn = document.getElementById('use-location');
+        const placesContainer = document.getElementById('places-container');
+        const placeModal = document.getElementById('place-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const placeDetailImage = document.getElementById('place-detail-image');
+        const placeDetailName = document.getElementById('place-detail-name');
+        const placeDetailDescription = document.getElementById('place-detail-description');
+        const placeMetroStation = document.getElementById('place-metro-station');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const offlineIndicator = document.getElementById('offline-indicator');
+        
+        // Function to toggle between Hindi and English
+        function toggleLanguage() {
+            currentLanguage = !currentLanguage;
+            
+            if (currentLanguage) {
+                // Switch to Hindi
+                languageText.textContent = 'English';
+                appTitle.textContent = 'दिल्ली मेट्रो नेवी';
+                document.getElementById('plan-journey').textContent = 'अपनी यात्रा योजना बनाएं';
+                document.getElementById('from-label').textContent = 'स्टेशन से';
+                document.getElementById('to-label').textContent = 'स्टेशन पर';
+                fromInput.placeholder = 'प्रारंभिक स्टेशन दर्ज करें';
+                toInput.placeholder = 'गंतव्य स्टेशन दर्ज करें';
+                document.getElementById('find-route-text').textContent = 'मार्ग खोजें';
+                document.getElementById('use-location-text').textContent = 'मेरा स्थान उपयोग करें';
+                document.getElementById('travel-time-title').textContent = 'यात्रा समय';
+                document.getElementById('total-cost-title').textContent = 'कुल लागत';
+                document.getElementById('changes-title').textContent = 'परिवर्तन';
+                document.getElementById('metro-lines-title').textContent = 'दिल्ली मेट्रो लाइने';
+                document.getElementById('yellow-line-name').textContent = 'पीली लाइन';
+                document.getElementById('red-line-name').textContent = 'लाल लाइन';
+                document.getElementById('blue-line-name').textContent = 'नीली लाइन';
+                document.getElementById('green-line-name').textContent = 'हरी लाइन';
+                document.getElementById('violet-line-name').textContent = 'बैंगनी लाइन';
+                document.getElementById('magenta-line-name').textContent = 'मैजेंटा लाइन';
+                document.getElementById('recommendations-title').textContent = 'आस-पास के प्रसिद्ध स्थान';
+                document.getElementById('tab-home-text').textContent = 'होम';
+                document.getElementById('tab-lines-text').textContent = 'लाइनें';
+                document.getElementById('tab-places-text').textContent = 'स्थान';
+                document.getElementById('tab-settings-text').textContent = 'सेटिंग्स';
+            } else {
+                // Switch to English
+                languageText.textContent = 'हिंदी';
+                appTitle.textContent = 'Delhi Metro Navi';
+                document.getElementById('plan-journey').textContent = 'Plan Your Journey';
+                document.getElementById('from-label').textContent = 'From Station';
+                document.getElementById('to-label').textContent = 'To Station';
+                fromInput.placeholder = 'Enter starting station';
+                toInput.placeholder = 'Enter destination station';
+                document.getElementById('find-route-text').textContent = 'Find Route';
+                document.getElementById('use-location-text').textContent = 'Use My Location';
+                document.getElementById('travel-time-title').textContent = 'Travel Time';
+                document.getElementById('total-cost-title').textContent = 'Total Cost';
+                document.getElementById('changes-title').textContent = 'Changes';
+                document.getElementById('metro-lines-title').textContent = 'Delhi Metro Lines';
+                document.getElementById('yellow-line-name').textContent = 'Yellow Line';
+                document.getElementById('red-line-name').textContent = 'Red Line';
+                document.getElementById('blue-line-name').textContent = 'Blue Line';
+                document.getElementById('green-line-name').textContent = 'Green Line';
+                document.getElementById('violet-line-name').textContent = 'Violet Line';
+                document.getElementById('magenta-line-name').textContent = 'Magenta Line';
+                document.getElementById('recommendations-title').textContent = 'Nearby Famous Places';
+                document.getElementById('tab-home-text').textContent = 'Home';
+                document.getElementById('tab-lines-text').textContent = 'Lines';
+                document.getElementById('tab-places-text').textContent = 'Places';
+                document.getElementById('tab-settings-text').textContent = 'Settings';
+            }
+            
+            // Update names of famous places if they're displayed
+            updateFamousPlacesLanguage();
+        }
+        
+        // Function to update language for famous places
+        function updateFamousPlacesLanguage() {
+            if (placesContainer.hasChildNodes()) {
+                renderFamousPlaces();
+            }
+        }
+        
+        // Function to show loading spinner
+        function showLoading() {
+            loadingSpinner.style.display = 'flex';
+        }
+        
+        // Function to hide loading spinner
+        function hideLoading() {
+            loadingSpinner.style.display = 'none';
+        }
+        
+        // Function to show suggestions for station input
+        function showSuggestions(inputElement, suggestionsElement) {
+            const inputValue = inputElement.value.toLowerCase();
+            suggestionsElement.innerHTML = '';
+            
+            if (inputValue.length < 2) {
+                suggestionsElement.style.display = 'none';
+                return;
+            }
+            
+            // Combine all stations from all lines
+            let allStations = [];
+            for (const line in metroStations) {
+                allStations = allStations.concat(metroStations[line]);
+            }
+            
+            // Remove duplicates
+            allStations = [...new Set(allStations)];
+            
+            // Filter stations that match input
+            const matchedStations = allStations.filter(station => 
+                station.toLowerCase().includes(inputValue)
+            );
+            
+            if (matchedStations.length > 0) {
+                matchedStations.forEach(station => {
+                    const suggestion = document.createElement('div');
+                    suggestion.className = 'suggestion-item';
+                    suggestion.textContent = station;
+                    suggestion.addEventListener('click', () => {
+                        inputElement.value = station;
+                        suggestionsElement.style.display = 'none';
+                    });
+                    suggestionsElement.appendChild(suggestion);
+                });
+                suggestionsElement.style.display = 'block';
+            } else {
+                suggestionsElement.style.display = 'none';
+            }
+        }
+        
+        // Function to swap from and to stations
+        function swapStations() {
+            const fromValue = fromInput.value;
+            fromInput.value = toInput.value;
+            toInput.value = fromValue;
+        }
+        
+        // Function to calculate route (simplified example)
+        function calculateRoute(from, to) {
+            showLoading();
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                // This is a simplified route calculation for demonstration
+                // In a real app, you would use proper routing algorithms
+                let steps = [];
+                let travelTimeMinutes = 25;
+                let totalCostRupees = 30;
+                let lineChanges = 1;
+                
+                // Example route steps
+                steps.push({
+                    action: 'Start',
+                    station: from,
+                    line: 'Yellow Line',
+                    lineColor: 'yellow-line',
+                    time: '0 min'
+                });
+                
+                steps.push({
+                    action: 'Change',
+                    station: 'Rajiv Chowk',
+                    line: 'Yellow Line to Blue Line',
+                    lineColor: 'blue-line',
+                    time: '15 min'
+                });
+                
+                steps.push({
+                    action: 'Arrive',
+                    station: to,
+                    line: 'Blue Line',
+                    lineColor: 'blue-line',
+                    time: '25 min'
+                });
+                
+                // Update UI with route details
+                renderRouteSteps(steps);
+                travelTime.textContent = travelTimeMinutes + ' minutes';
+                totalCost.textContent = '₹' + totalCostRupees;
+                changes.textContent = lineChanges;
+                routeResult.style.display = 'block';
+                
+                hideLoading();
+            }, 1500);
+        }
+        
+        // Function to render route steps
+        function renderRouteSteps(steps) {
+            routeSteps.innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                const stepElement = document.createElement('div');
+                stepElement.className = 'route-step';
+                
+                const icon = document.createElement('div');
+                if (step.action === 'Start') {
+                    icon.className = 'step-icon yellow-line';
+                    icon.innerHTML = '<i class="fas fa-map-marker-alt"></i>';
+                } else if (step.action === 'Change') {
+                    icon.className = 'step-icon blue-line';
+                    icon.innerHTML = '<i class="fas fa-exchange-alt"></i>';
+                } else {
+                    icon.className = 'step-icon green-line';
+                    icon.innerHTML = '<i class="fas fa-flag-checkered"></i>';
+                }
+                
+                const details = document.createElement('div');
+                details.className = 'step-details';
+                
+                const station = document.createElement('div');
+                station.className = 'step-station';
+                station.textContent = step.station;
+                
+                const info = document.createElement('div');
+                info.className = 'step-info';
+                
+                if (step.action === 'Start') {
+                    info.textContent = currentLanguage ? 
+                        `${step.line} पर शुरू करें | समय: ${step.time}` : 
+                        `Start on ${step.line} | Time: ${step.time}`;
+                } else if (step.action === 'Change') {
+                    info.textContent = currentLanguage ? 
+                        `${step.line} में बदलें | समय: ${step.time}` : 
+                        `Change to ${step.line} | Time: ${step.time}`;
+                } else {
+                    info.textContent = currentLanguage ? 
+                        `${step.line} पर गंतव्य | कुल समय: ${step.time}` : 
+                        `Destination on ${step.line} | Total time: ${step.time}`;
+                }
+                
+                details.appendChild(station);
+                details.appendChild(info);
+                
+                stepElement.appendChild(icon);
+                stepElement.appendChild(details);
+                
+                routeSteps.appendChild(stepElement);
+            });
+        }
+        
+        // Function to render famous places
+        function renderFamousPlaces() {
+            placesContainer.innerHTML = '';
+            
+            famousPlaces.forEach(place => {
+                const placeCard = document.createElement('div');
+                placeCard.className = 'place-card';
+                placeCard.setAttribute('data-id', place.id);
+                
+                const placeImage = document.createElement('div');
+                placeImage.className = 'place-image';
+                placeImage.style.backgroundImage = `url(https://placehold.co/300x200?text=${encodeURIComponent(place.name)})`;
+                
+                const placeOverlay = document.createElement('div');
+                placeOverlay.className = 'place-overlay';
+                
+                const placeName = document.createElement('div');
+                placeName.className = 'place-name';
+                placeName.textContent = currentLanguage ? place.nameHindi : place.name;
+                
+                const placeDistance = document.createElement('div');
+                placeDistance.className = 'place-distance';
+                placeDistance.textContent = place.distance + ' ' + (currentLanguage ? 'दूर' : 'away');
+                
+                placeOverlay.appendChild(placeName);
+                placeOverlay.appendChild(placeDistance);
+                placeImage.appendChild(placeOverlay);
+                
+                placeCard.appendChild(placeImage);
+                placeCard.addEventListener('click', () => openPlaceModal(place));
+                
+                placesContainer.appendChild(placeCard);
+            });
+        }
+        
+        // Function to open place modal
+        function openPlaceModal(place) {
+            placeDetailImage.style.backgroundImage = `url(https://placehold.co/600x400?text=${encodeURIComponent(place.name)})`;
+            placeDetailName.textContent = currentLanguage ? place.nameHindi : place.name;
+            placeDetailDescription.textContent = currentLanguage ? place.descriptionHindi : place.description;
+            placeMetroStation.textContent = currentLanguage ? 
+                `निकटतम मेट्रो: ${place.metroStation} (${place.metroLine})` : 
+                `Nearest Metro: ${place.metroStation} (${place.metroLine})`;
+            
+            placeModal.style.display = 'flex';
+        }
+        
+        // Function to simulate finding nearest station
+        function findNearestStation() {
+            nearestStationText.textContent = currentLanguage ? 
+                'निकटतम स्टेशन: राजीव चौक' : 
+                'Nearest station: Rajiv Chowk';
+            fromInput.value = 'Rajiv Chowk';
+            nearestStationContainer.style.display = 'flex';
+        }
+        
+        // Function to check offline status
+        function checkOfflineStatus() {
+            if (!navigator.onLine) {
+                offlineIndicator.style.display = 'block';
+                // In a real app, you would enable offline features
+            } else {
+                offlineIndicator.style.display = 'none';
+            }
+        }
+        
+        // Event listeners
+        toggleLanguageBtn.addEventListener('click', toggleLanguage);
+        
+        fromInput.addEventListener('input', () => {
+            showSuggestions(fromInput, fromSuggestions);
+        });
+        
+        toInput.addEventListener('input', () => {
+            showSuggestions(toInput, toSuggestions);
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!fromInput.contains(e.target) && !fromSuggestions.contains(e.target)) {
+                fromSuggestions.style.display = 'none';
+            }
+            
+            if (!toInput.contains(e.target) && !toSuggestions.contains(e.target)) {
+                toSuggestions.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('swap-stations').addEventListener('click', swapStations);
+        
+        findRouteBtn.addEventListener('click', () => {
+            if (fromInput.value && toInput.value) {
+                calculateRoute(fromInput.value, toInput.value);
+            } else {
+                alert(currentLanguage ? 
+                    'कृपया दोनों स्टेशन दर्ज करें' : 
+                    'Please enter both stations');
+            }
+        });
+        
+        useLocationBtn.addEventListener('click', findNearestStation);
+        
+        closeModalBtn.addEventListener('click', () => {
+            placeModal.style.display = 'none';
+        });
+        
+        // Tab switching functionality
+        const tabs = ['tab-home', 'tab-lines', 'tab-places', 'tab-settings'];
+        const tabButtons = tabs.map(tab => document.getElementById(tab));
+        
+        tabButtons.forEach(tabButton => {
+            tabButton.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabButton.classList.add('active');
+                
+                // Tab switching logic would go here
+                // For simplicity, we're just highlighting the tabs
+            });
+        });
+        
+        // Check offline status when page loads
+        checkOfflineStatus();
+        
+        // Listen for online/offline events
+        window.addEventListener('online', checkOfflineStatus);
+        window.addEventListener('offline', checkOfflineStatus);
+        
+        // Initialize the app
+        renderFamousPlaces();
+        
+        // Voice recognition functionality
+        if ('webkitSpeechRecognition' in window) {
+            const fromMicBtn = document.getElementById('mic-from');
+            const toMicBtn = document.getElementById('mic-to');
+            
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-IN';
+            
+            fromMicBtn.addEventListener('click', () => {
+                recognition.lang = currentLanguage ? 'hi-IN' : 'en-IN';
+                recognition.start();
+                fromInput.placeholder = currentLanguage ? 
+                    'सुन रहा हूँ...' : 
+                    'Listening...';
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    fromInput.value = transcript;
+                    fromInput.placeholder = currentLanguage ? 
+                        'प्रारंभिक स्टेशन दर्ज करें' : 
+                        'Enter starting station';
+                };
+                
+                recognition.onerror = function() {
+                    fromInput.placeholder = currentLanguage ? 
+                        'प्रारंभिक स्टेशन दर्ज करें' : 
+                        'Enter starting station';
+                };
+            });
+            
+            toMicBtn.addEventListener('click', () => {
+                recognition.lang = currentLanguage ? 'hi-IN' : 'en-IN';
+                recognition.start();
+                toInput.placeholder = currentLanguage ? 
+                    'सुन रहा हूँ...' : 
+                    'Listening...';
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    toInput.value = transcript;
+                    toInput.placeholder = currentLanguage ? 
+                        'गंतव्य स्टेशन दर्ज करें' : 
+                        'Enter destination station';
+                };
+                
+                recognition.onerror = function() {
+                    toInput.placeholder = currentLanguage ? 
+                        'गंतव्य स्टेशन दर्ज करें' : 
+                        'Enter destination station';
+                };
+            });
+        } else {
+            document.getElementById('mic-from').style.display = 'none';
+            document.getElementById('mic-to').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
